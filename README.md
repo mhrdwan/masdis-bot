@@ -24,6 +24,7 @@ nano .env
 ```
 
 **Yang WAJIB diisi di .env:**
+
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
@@ -48,13 +49,13 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 ## 📦 Services & Ports
 
-| Service | Port | Deskripsi |
-|---------|------|-----------|
-| WhatsApp Bot | - | Bot WhatsApp dengan AI |
-| REST API | 3000 | API untuk web/mobile |
-| MySQL | 3307 | Database (host) → 3306 (container) |
+| Service      | Port | Deskripsi                                      |
+| ------------ | ---- | ---------------------------------------------- |
+| WhatsApp Bot | -    | Bot WhatsApp dengan AI                         |
+| REST API     | 3001 | API untuk web/mobile (host) → 3000 (container) |
+| MySQL        | 3307 | Database (host) → 3306 (container)             |
 
-**MySQL Port 3307** = Aman, tidak bentrok dengan MySQL lain!
+**Ports aman dari bentrok!**
 
 ---
 
@@ -75,18 +76,18 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 ```bash
 # Health check
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 
 # Send chat
-curl -X POST http://localhost:3000/api/chat/send \
+curl -X POST http://localhost:3001/api/chat/send \
   -H "Content-Type: application/json" \
   -d '{"email":"test@mail.com","name":"Test","message":"Halo"}'
 
 # Get history
-curl "http://localhost:3000/api/chat/history?email=test@mail.com"
+curl "http://localhost:3001/api/chat/history?email=test@mail.com"
 
 # Hotel booking
-curl -X POST http://localhost:3000/api/chat/send \
+curl -X POST http://localhost:3001/api/chat/send \
   -H "Content-Type: application/json" \
   -d '{"email":"test@mail.com","message":"Saya mau cari hotel di Bali"}'
 ```

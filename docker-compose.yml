@@ -69,8 +69,8 @@ services:
       - MASTERDISKON_API_BASE_URL=https://api.masterdiskon.com/v1
       - MASTERDISKON_API_ACCOUNT=52
     ports:
-      # API Server port
-      - "3000:3000"
+      # API Server port (3001 di host -> 3000 di container)
+      - "3001:3000"
     volumes:
       # Persist WhatsApp session agar tidak perlu scan QR lagi
       - wa_session:/app/.wwebjs_auth
@@ -117,7 +117,7 @@ networks:
 # ============================================
 #
 # - MySQL: localhost:3307 (host) -> 3306 (container)
-# - API Server: localhost:3000 (WhatsApp Bot + REST API)
+# - API Server: localhost:3001 (host) -> 3000 (container)
 # - WhatsApp: Scan QR dari logs
 #
 # ============================================

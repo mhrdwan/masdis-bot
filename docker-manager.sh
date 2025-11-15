@@ -78,7 +78,7 @@ case "$1" in
         echo "📱 Scan QR code WhatsApp dengan command:"
         echo "   $DOCKER_COMPOSE_CMD logs -f whatsapp-bot"
         echo ""
-        echo "🌐 API Server: http://localhost:3000"
+        echo "🌐 API Server: http://localhost:3001 (host) → 3000 (container)"
         echo "💾 MySQL: localhost:3307 (host) → 3306 (container)"
         echo ""
         echo "📋 Lihat logs: ./docker-manager.sh logs"
