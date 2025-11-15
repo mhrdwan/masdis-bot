@@ -86,6 +86,11 @@ curl -X POST http://localhost:3001/api/chat/send \
 # Get history
 curl "http://localhost:3001/api/chat/history?email=test@mail.com"
 
+# Reset conversation (clear hotel booking state)
+curl -X POST http://localhost:3001/api/chat/reset \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@mail.com"}'
+
 # Hotel booking
 curl -X POST http://localhost:3001/api/chat/send \
   -H "Content-Type: application/json" \
@@ -98,6 +103,8 @@ curl -X POST http://localhost:3001/api/chat/send \
 
 - ✅ AI Chat dengan Google Gemini
 - ✅ Multi-step Hotel Booking (7 steps)
+- ✅ Auto-detect cancel keywords ("batal", "cancel", "reset", "stop")
+- ✅ Auto-clear state on general questions ("kamu siapa?", "apa itu?", etc)
 - ✅ Masterdiskon API Integration
 - ✅ REST API untuk Web/Mobile
 - ✅ HTML & WhatsApp Format Response

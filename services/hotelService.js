@@ -70,6 +70,130 @@ async function searchLocation(query) {
 }
 
 /**
+ * Get hotel detail + room options (untuk property langsung tanpa geoid)
+ * @param {Object} params - Parameter pencarian
+ * @returns {Object} - { hotel: {}, rooms: [], meta: {} }
+ */
+async function getHotelDetail(params) {
+  try {
+    const {
+      propertyId,
+      keyword,
+      dateFrom, // format: DD-MM-YYYY
+      dateTo, // format: DD-MM-YYYY
+      adult = 1,
+      child = 0,
+      infant = 0,
+      room = 1,
+    } = params;
+
+    console.log(`🏨 Getting hotel detail for property: ${propertyId}`);
+    console.log(`   Dates: ${dateFrom} to ${dateTo}`);
+    console.log(`   Guests: ${adult} adult, ${child} child, ${infant} infant`);
+    console.log(`   Rooms: ${room}`);
+
+    const body = {
+      product: "hotel",
+      from: propertyId, // Pakai propertyId sebagai from
+      productId: propertyId,
+      productDetail: propertyId,
+      adult: String(adult),
+      child: String(child),
+      infant: String(infant),
+      keyword: keyword,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      room: String(room),
+      childAge: [],
+      classFrom: "0",
+      classTo: "5",
+      showDetail: false,
+      pax: {
+        room: String(room),
+        adult: String(adult),
+        child: String(child),
+        infant: String(infant),
+        childAge: [],
+      },
+    };
+
+    const response = await fetch(
+      `${MASTERDISKON_API_BASE}/apitrav/booking/offerdetail`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success || !result.data) {
+      console.log("⚠️  No hotel detail found");
+      return { hotel: null, rooms: [], meta: {} };
+    }
+
+    const hotelData = result.data;
+
+    // Format hotel detail
+    const hotel = {
+      id: hotelData.id,
+      name: hotelData.name,
+      class: hotelData.class,
+      reviewScore: hotelData.reviewScore,
+      address: hotelData.detail?.address || "",
+      city: hotelData.detail?.city || "",
+      latitude: hotelData.detail?.latitude || "",
+      longitude: hotelData.detail?.longitude || "",
+      facilities: hotelData.detail?.facilitiesNew || [],
+      images: hotelData.detail?.images || [],
+    };
+
+    // Format room options
+    const rooms = [];
+    if (hotelData.options && hotelData.options.length > 0) {
+      hotelData.options.forEach((option) => {
+        if (option.room && option.room.length > 0) {
+          option.room.forEach((room) => {
+            rooms.push({
+              detailId: room.detailId,
+              type: room.type,
+              price: room.price,
+              promoPrice: room.promoPrice,
+              maxOccupancy: room.maxOccupancy,
+              maxAdult: room.maxAdult,
+              maxChildren: room.maxChildren,
+              refundIncluded: room.refundIncluded,
+              facilities: room.facilitiesNew || [],
+              images: room.images || [],
+            });
+          });
+        }
+      });
+    }
+
+    console.log(`✅ Found hotel detail with ${rooms.length} room options`);
+
+    return {
+      hotel: hotel,
+      rooms: rooms.slice(0, 5), // Limit to 5 room options
+      meta: {
+        totalRooms: rooms.length,
+      },
+    };
+  } catch (error) {
+    console.error("❌ Hotel detail error:", error.message);
+    return { hotel: null, rooms: [], meta: {} };
+  }
+}
+
+/**
  * Search hotel berdasarkan kriteria
  * @param {Object} params - Parameter pencarian
  * @returns {Object} - { hotels: [], meta: {} }
@@ -356,6 +480,7 @@ function parseDate(dateStr) {
 module.exports = {
   searchLocation,
   searchHotels,
+  getHotelDetail,
   generateMapsLink,
   formatPrice,
   formatDate,

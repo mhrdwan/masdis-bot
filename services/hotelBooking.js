@@ -91,10 +91,82 @@ function isHotelRequest(message) {
 }
 
 /**
+ * Detect cancel/reset keywords
+ */
+function isCancelRequest(message) {
+  const cancelKeywords = [
+    "batal",
+    "cancel",
+    "stop",
+    "reset",
+    "keluar",
+    "exit",
+    "quit",
+    "batalkan",
+    "ulang",
+    "mulai lagi",
+  ];
+
+  const lowerMsg = message.toLowerCase().trim();
+  return cancelKeywords.some((keyword) => lowerMsg.includes(keyword));
+}
+
+/**
+ * Detect general questions (not hotel booking answers)
+ */
+function isGeneralQuestion(message) {
+  const lowerMsg = message.toLowerCase().trim();
+
+  const generalPatterns = [
+    /^(siapa|apa|kapan|dimana|kenapa|bagaimana|berapa)/i,
+    /kamu (siapa|apa|bisa|ada|punya|tau|tahu|ngapain)/i,
+    /apa itu/i,
+    /tolong/i,
+    /bantuan/i,
+    /help/i,
+    /hi|halo|hello|hai|hei/i,
+    /terima kasih|thanks|thank you|makasih/i,
+  ];
+
+  // Check patterns
+  if (generalPatterns.some((pattern) => pattern.test(lowerMsg))) {
+    return true;
+  }
+
+  // Specific check for questions about bot capabilities
+  const capabilityQuestions = [
+    "bisa apa",
+    "bisa ngapain",
+    "bisa bantu apa",
+    "fungsi",
+    "kegunaan",
+    "manfaat",
+  ];
+
+  if (capabilityQuestions.some((q) => lowerMsg.includes(q))) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Handle hotel booking conversation flow
  */
 async function handleHotelBooking(waNumber, message, userName) {
   const state = conversationState.getConversationState(waNumber);
+
+  // Check for cancel request (works in any state)
+  if (state && isCancelRequest(message)) {
+    conversationState.clearConversationState(waNumber);
+    return "Pencarian hotel dibatalkan. Silakan mulai lagi jika ingin mencari hotel. 🙏";
+  }
+
+  // If user is in booking flow but asks general question, exit flow
+  if (state && isGeneralQuestion(message)) {
+    conversationState.clearConversationState(waNumber);
+    return null; // Let it fall through to normal LLM response
+  }
 
   // Step 1: Cari lokasi
   if (!state) {
@@ -138,6 +210,11 @@ async function handleHotelBooking(waNumber, message, userName) {
  * Step 1: Start hotel search - extract lokasi dari pesan
  */
 async function startHotelSearch(waNumber, message, userName) {
+  // FIRST: Check if this is actually a general question, not hotel request
+  if (isGeneralQuestion(message)) {
+    return null; // Let it fall through to normal LLM response
+  }
+
   // Extract lokasi dari pesan
   // Contoh: "saya ingin menginap di jakarta"
   const locationPattern = /(di|ke|area|daerah|kota|wilayah)\s+([a-zA-Z\s]+)/i;
@@ -391,84 +468,155 @@ async function performHotelSearch(waNumber, data) {
     budget,
   } = data;
 
-  const searchParams = {
-    geoid: locationResult.geoid || locationResult.propertyId,
-    keyword: locationResult.name,
-    dateFrom: checkInDate,
-    dateTo: checkOutDate,
-    adult: adult,
-    child: child,
-    infant: infant,
-    room: room,
-    page: 1,
-    limit: 10,
-    priceTo: budget || 20000000, // Gunakan budget jika ada, default 20jt
-  };
-
   // Clear state setelah search
   conversationState.clearConversationState(waNumber);
 
-  const result = await hotelService.searchHotels(searchParams);
+  // Case 1: Kalau ada geoid, pakai searchHotels (untuk region/area)
+  if (locationResult.geoid) {
+    const searchParams = {
+      geoid: locationResult.geoid,
+      keyword: locationResult.name,
+      dateFrom: checkInDate,
+      dateTo: checkOutDate,
+      adult: adult,
+      child: child,
+      infant: infant,
+      room: room,
+      page: 1,
+      limit: 10,
+      priceTo: budget || 20000000, // Gunakan budget jika ada, default 20jt
+    };
 
-  if (result.hotels.length === 0) {
-    return `Maaf, tidak ada hotel tersedia di *${locationResult.name}* untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau lokasi lain?`;
+    const result = await hotelService.searchHotels(searchParams);
+
+    if (result.hotels.length === 0) {
+      return `Maaf, tidak ada hotel tersedia di *${locationResult.name}* untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau lokasi lain?`;
+    }
+
+    // Format response untuk list hotel
+    let response = `🏨 *HOTEL DI ${locationResult.name.toUpperCase()}*\n\n`;
+    response += `📅 ${hotelService.formatDate(
+      checkInDate
+    )} - ${hotelService.formatDate(checkOutDate)}\n`;
+    response += `👥 ${adult} dewasa${child > 0 ? ", " + child + " anak" : ""}${
+      infant > 0 ? ", " + infant + " bayi" : ""
+    }\n`;
+    response += `🛏️ ${room} kamar\n`;
+    if (budget && budget < 20000000) {
+      response += `💰 Budget: Maks ${hotelService.formatPrice(budget)}/malam\n`;
+    }
+    response += `\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+    // Tampilkan 7 hotel pertama
+    const hotelsToShow = result.hotels.slice(0, 7);
+
+    hotelsToShow.forEach((hotel, index) => {
+      response += `*${index + 1}. ${hotel.name}*\n`;
+      response += `${"⭐".repeat(hotel.class || 0)}\n`;
+      response += `💰 ${hotelService.formatPrice(
+        hotel.isPromo ? hotel.promoPrice : hotel.price
+      )}`;
+      if (hotel.isPromo) {
+        response += ` ~${hotelService.formatPrice(hotel.price)}~ 🔥`;
+      }
+      response += `\n`;
+      if (hotel.reviewScore && hotel.reviewScore !== "0.0") {
+        response += `⭐ Rating: ${hotel.reviewScore}/10\n`;
+      }
+      response += `📍 ${hotel.address}\n`;
+
+      // Add Google Maps link if lat/lon available
+      if (hotel.latitude && hotel.longitude) {
+        const mapsLink = hotelService.generateMapsLink(
+          hotel.latitude,
+          hotel.longitude,
+          hotel.name
+        );
+        if (mapsLink) {
+          response += `🗺️ Lokasi: ${mapsLink}\n`;
+        }
+      }
+
+      response += `\n`;
+    });
+
+    response += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    response += `Untuk booking, hubungi Customer Service kami:\n`;
+    response += `📞 *0822 5500 3535*\n`;
+    response += `📧 cs@masterdiskon.com\n\n`;
+    response += `_Sebutkan nama hotel yang Anda minati untuk mendapatkan penawaran terbaik!_`;
+
+    return response;
   }
 
-  // Format response
-  let response = `🏨 *HOTEL DI ${locationResult.name.toUpperCase()}*\n\n`;
-  response += `📅 ${hotelService.formatDate(
-    checkInDate
-  )} - ${hotelService.formatDate(checkOutDate)}\n`;
-  response += `👥 ${adult} dewasa${child > 0 ? ", " + child + " anak" : ""}${
-    infant > 0 ? ", " + infant + " bayi" : ""
-  }\n`;
-  response += `🛏️ ${room} kamar\n`;
-  if (budget && budget < 20000000) {
-    response += `💰 Budget: Maks ${hotelService.formatPrice(budget)}/malam\n`;
-  }
-  response += `\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+  // Case 2: Kalau TIDAK ada geoid (property langsung), pakai getHotelDetail
+  else {
+    const detailParams = {
+      propertyId: locationResult.propertyId,
+      keyword: locationResult.name,
+      dateFrom: checkInDate,
+      dateTo: checkOutDate,
+      adult: adult,
+      child: child,
+      infant: infant,
+      room: room,
+    };
 
-  // Tampilkan 5 hotel pertama
-  const hotelsToShow = result.hotels.slice(0, 7);
+    const result = await hotelService.getHotelDetail(detailParams);
 
-  hotelsToShow.forEach((hotel, index) => {
-    response += `*${index + 1}. ${hotel.name}*\n`;
-    response += `${"⭐".repeat(hotel.class || 0)}\n`;
-    response += `💰 ${hotelService.formatPrice(
-      hotel.isPromo ? hotel.promoPrice : hotel.price
-    )}`;
-    if (hotel.isPromo) {
-      response += ` ~${hotelService.formatPrice(hotel.price)}~ 🔥`;
+    if (!result.hotel || result.rooms.length === 0) {
+      return `Maaf, *${locationResult.name}* tidak tersedia untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau pilih hotel lain?`;
     }
-    response += `\n`;
-    if (hotel.reviewScore && hotel.reviewScore !== "0.0") {
-      response += `⭐ Rating: ${hotel.reviewScore}/10\n`;
-    }
-    response += `📍 ${hotel.address}\n`;
 
-    // Add Google Maps link if lat/lon available
-    if (hotel.latitude && hotel.longitude) {
+    // Format response untuk hotel detail + rooms
+    let response = `🏨 *${result.hotel.name.toUpperCase()}*\n`;
+    response += `${"⭐".repeat(result.hotel.class || 0)}\n\n`;
+    response += `📅 ${hotelService.formatDate(
+      checkInDate
+    )} - ${hotelService.formatDate(checkOutDate)}\n`;
+    response += `👥 ${adult} dewasa${child > 0 ? ", " + child + " anak" : ""}${
+      infant > 0 ? ", " + infant + " bayi" : ""
+    }\n`;
+    response += `🛏️ ${room} kamar\n`;
+    response += `📍 ${result.hotel.address}\n`;
+
+    // Add Google Maps link
+    if (result.hotel.latitude && result.hotel.longitude) {
       const mapsLink = hotelService.generateMapsLink(
-        hotel.latitude,
-        hotel.longitude,
-        hotel.name
+        result.hotel.latitude,
+        result.hotel.longitude,
+        result.hotel.name
       );
       if (mapsLink) {
         response += `🗺️ Lokasi: ${mapsLink}\n`;
       }
     }
 
-    response += `\n`;
-  });
+    response += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+    response += `*PILIHAN KAMAR:*\n\n`;
 
-  response += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-  //   response += `Ditemukan *${result.meta.total}* hotel 🎉\n\n`;
-  response += `Untuk booking, hubungi Customer Service kami:\n`;
-  response += `📞 *0822 5500 3535*\n`;
-  response += `📧 cs@masterdiskon.com\n\n`;
-  response += `_Sebutkan nama hotel yang Anda minati untuk mendapatkan penawaran terbaik!_`;
+    // Tampilkan max 5 room options
+    result.rooms.forEach((room, index) => {
+      response += `*${index + 1}. ${room.type}*\n`;
+      response += `💰 ${hotelService.formatPrice(room.price)}`;
+      if (room.promoPrice && room.promoPrice !== room.price) {
+        response += ` ~${hotelService.formatPrice(room.promoPrice)}~ 🔥`;
+      }
+      response += `\n`;
+      response += `👥 Maks: ${room.maxOccupancy} orang\n`;
+      response += `${
+        room.refundIncluded ? "✅ Refundable" : "❌ Non-Refundable"
+      }\n\n`;
+    });
 
-  return response;
+    response += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    response += `Untuk booking, hubungi Customer Service kami:\n`;
+    response += `📞 *0822 5500 3535*\n`;
+    response += `📧 cs@masterdiskon.com\n\n`;
+    response += `_Sebutkan tipe kamar yang Anda minati untuk mendapatkan penawaran terbaik!_`;
+
+    return response;
+  }
 }
 
 module.exports = {

@@ -287,6 +287,56 @@ app.get("/api/chat/history", async (req, res) => {
   }
 });
 
+/**
+ * POST /api/chat/reset
+ * Clear conversation state untuk user (reset hotel booking flow)
+ *
+ * Body:
+ *   {
+ *     "email": "user@example.com"
+ *   }
+ *
+ * Response:
+ *   {
+ *     "success": true,
+ *     "message": "Conversation state cleared for user@example.com"
+ *   }
+ */
+app.post("/api/chat/reset", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== "string" || email.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "Email is required",
+      });
+    }
+
+    const userEmail = email.trim().toLowerCase();
+
+    console.log(`🔄 API Reset conversation state for ${userEmail}`);
+
+    // Import conversationState module
+    const conversationState = require("./services/conversationState");
+    conversationState.clearConversationState(userEmail);
+
+    res.json({
+      success: true,
+      message: `Conversation state cleared for ${userEmail}`,
+    });
+
+    console.log(`✅ Conversation state cleared for ${userEmail}`);
+  } catch (error) {
+    console.error("❌ API chat/reset error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message: error.message,
+    });
+  }
+});
+
 // ============================================
 // ERROR HANDLERS
 // ============================================
