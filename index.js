@@ -35,8 +35,9 @@ const client = new Client({
       "--no-first-run",
       "--no-zygote",
       "--disable-gpu",
-      "--single-process",
       "--disable-extensions",
+      "--disable-blink-features=AutomationControlled",
+      "--user-data-dir=/tmp/chromium-user-data",
     ],
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   },
@@ -45,6 +46,8 @@ const client = new Client({
     remotePath:
       "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
   },
+  authTimeoutMs: 0,
+  qrMaxRetries: 5,
 });
 
 // ============================================
