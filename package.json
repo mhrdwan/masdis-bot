@@ -1,0 +1,30 @@
+{
+  "name": "whatsapp-bot-ai",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot dengan AI/LLM dan MySQL untuk memori chat",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "ai",
+    "llm",
+    "mysql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "mysql2": "^3.6.5",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

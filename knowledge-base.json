@@ -1,0 +1,148 @@
+{
+  "companyProfile": {
+    "companyName": "PT Master Diskon Internasional",
+    "brand": "Masterdiskon",
+    "tagline": "Travel, Live, Discover",
+    "foundedYear": 2019,
+    "experience": "5+ tahun",
+    "location": {
+      "address": "Jl. H. Baping No. 100, Susukan, Ciracas, Kota Jakarta Timur, DKI Jakarta 13740",
+      "city": "Jakarta Timur",
+      "province": "DKI Jakarta",
+      "postalCode": "13740",
+      "country": "Indonesia"
+    },
+    "description": "Masterdiskon adalah perusahaan travel yang menyediakan berbagai kebutuhan perjalanan dalam satu platform, termasuk tiket pesawat, hotel, kereta api, dan tour. Berdiri sejak 2019 dan berpengalaman lebih dari lima tahun, Masterdiskon membantu pelanggan merayakan kebahagiaan melalui berbagai pengalaman perjalanan domestik dan internasional."
+  },
+  "services": [
+    {
+      "id": "flight",
+      "name": "Penerbangan",
+      "description": "Tiket pesawat domestik dan internasional",
+      "keywords": [
+        "pesawat",
+        "flight",
+        "terbang",
+        "tiket pesawat",
+        "penerbangan"
+      ]
+    },
+    {
+      "id": "hotel",
+      "name": "Akomodasi",
+      "description": "Hotel, resort, dan penginapan",
+      "keywords": ["hotel", "penginapan", "resort", "akomodasi", "menginap"]
+    },
+    {
+      "id": "train",
+      "name": "Kereta Api",
+      "description": "Tiket kereta api untuk perjalanan domestik",
+      "keywords": ["kereta", "train", "kereta api", "KAI"]
+    },
+    {
+      "id": "tour",
+      "name": "Paket Tour",
+      "description": "Paket wisata domestik dan internasional",
+      "keywords": ["tour", "paket wisata", "liburan", "wisata", "traveling"]
+    },
+    {
+      "id": "other",
+      "name": "Layanan Lainnya",
+      "description": "Berbagai layanan perjalanan lainnya",
+      "keywords": ["lainnya", "other services"]
+    }
+  ],
+  "valueProposition": [
+    {
+      "title": "Kemudahan Pemesanan",
+      "description": "Semua kebutuhan perjalanan dalam satu aplikasi"
+    },
+    {
+      "title": "Pilihan Lengkap",
+      "description": "Berbagai pilihan perjalanan domestik dan internasional"
+    },
+    {
+      "title": "Nyaman & Aman",
+      "description": "Pengalaman liburan yang nyaman dan aman"
+    },
+    {
+      "title": "Pembayaran Fleksibel",
+      "description": "Metode pembayaran yang lengkap dan mudah"
+    }
+  ],
+  "contact": {
+    "customerService": {
+      "email": "cs@masterdiskon.com",
+      "whatsapp": "0822 5500 3535",
+      "phone": "(021) 27811300",
+      "hours": "24/7 (untuk informasi jam operasional hubungi CS)"
+    },
+    "socialMedia": {
+      "twitter": "@masterdiskon",
+      "instagram": "@masterdiskon",
+      "facebook": "Masterdiskon",
+      "youtube": "Masterdiskon",
+      "tiktok": "@masterdiskon"
+    }
+  },
+  "faq": [
+    {
+      "question": "Bagaimana cara pesan tiket di Masterdiskon?",
+      "answer": "Anda bisa memesan melalui aplikasi/website Masterdiskon atau hubungi customer service kami di WhatsApp 0822 5500 3535 atau telepon (021) 27811300."
+    },
+    {
+      "question": "Apakah bisa reschedule/refund tiket?",
+      "answer": "Kebijakan reschedule dan refund mengikuti ketentuan dari maskapai/hotel/penyedia layanan. Untuk informasi detail, silakan hubungi customer service kami."
+    },
+    {
+      "question": "Metode pembayaran apa saja yang tersedia?",
+      "answer": "Masterdiskon menyediakan berbagai metode pembayaran yang lengkap. Untuk detail metode pembayaran, silakan hubungi customer service kami."
+    },
+    {
+      "question": "Apakah Masterdiskon melayani pemesanan untuk rombongan?",
+      "answer": "Ya, kami melayani pemesanan untuk rombongan baik untuk tiket pesawat, hotel, maupun paket tour. Hubungi customer service untuk penawaran khusus rombongan."
+    },
+    {
+      "question": "Bagaimana cara mendapatkan promo/diskon?",
+      "answer": "Pantau terus sosial media kami (Instagram, Twitter, Facebook, TikTok, YouTube) atau hubungi customer service untuk informasi promo terbaru."
+    }
+  ],
+  "commonTopics": {
+    "booking": {
+      "keywords": ["booking", "pesan", "beli", "order", "reservasi"],
+      "response": "Untuk pemesanan, Anda bisa hubungi customer service kami di WhatsApp 0822 5500 3535 atau telepon (021) 27811300. Tim kami siap membantu Anda menemukan penawaran terbaik!"
+    },
+    "price": {
+      "keywords": ["harga", "price", "biaya", "tarif", "berapa"],
+      "response": "Harga bervariasi tergantung destinasi, tanggal, dan ketersediaan. Untuk mendapatkan harga terbaik, silakan hubungi customer service kami di WhatsApp 0822 5500 3535 atau email cs@masterdiskon.com"
+    },
+    "payment": {
+      "keywords": ["bayar", "payment", "transfer", "pembayaran"],
+      "response": "Kami menyediakan berbagai metode pembayaran yang lengkap. Untuk detail pembayaran pesanan Anda, silakan hubungi customer service kami."
+    },
+    "cancel": {
+      "keywords": ["cancel", "batal", "refund", "reschedule", "ubah"],
+      "response": "Untuk pembatalan atau perubahan jadwal, kebijakan mengikuti ketentuan penyedia layanan. Hubungi customer service kami di 0822 5500 3535 untuk bantuan lebih lanjut."
+    },
+    "complaint": {
+      "keywords": ["complaint", "komplain", "masalah", "problem", "keluhan"],
+      "response": "Mohon maaf atas ketidaknyamanannya. Silakan sampaikan keluhan Anda ke customer service kami di cs@masterdiskon.com atau WhatsApp 0822 5500 3535. Tim kami akan segera membantu menyelesaikan masalah Anda."
+    }
+  },
+  "chatbotBehavior": {
+    "tone": "Ramah, profesional, dan helpful",
+    "language": "Bahasa Indonesia",
+    "responseStyle": "Singkat, jelas, dan informatif",
+    "escalationRules": [
+      "Jika ditanya harga spesifik → arahkan ke CS",
+      "Jika ingin booking → arahkan ke CS",
+      "Jika komplain → arahkan ke CS dengan empati",
+      "Jika pertanyaan teknis detail → arahkan ke CS"
+    ],
+    "greetingMessages": [
+      "Halo! Selamat datang di Masterdiskon. Ada yang bisa saya bantu?",
+      "Hi! Saya asisten virtual Masterdiskon. Mau tanya-tanya tentang perjalanan Anda?",
+      "Halo! Travel, Live, Discover bersama Masterdiskon. Bagaimana saya bisa membantu Anda hari ini?"
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # MySQL Database
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: wa_bot_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: wa_bot_db
+      MYSQL_USER: wa_bot_user
+      MYSQL_PASSWORD: wa_bot_pass_123
+    ports:
+      # Port 3307 di host -> 3306 di container (avoid bentrok dengan MySQL server lain)
+      - "3307:3306"
+    volumes:
+      # Persist data MySQL
+      - mysql_data:/var/lib/mysql
+      # Auto-create tables saat pertama kali
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - wa_bot_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p$$MYSQL_ROOT_PASSWORD",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # WhatsApp Bot Service
+  # ============================================
+  whatsapp-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wa_bot_app
+    restart: unless-stopped
+    environment:
+      # Database connection (connect ke service mysql)
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=wa_bot_user
+      - DB_PASSWORD=wa_bot_pass_123
+      - DB_NAME=wa_bot_db
+      # Bot config
+      - CHAT_HISTORY_LIMIT=10
+      # LLM config
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.5-flash
+      - GEMINI_TEMPERATURE=0.7
+      - GEMINI_MAX_TOKENS=500
+      # API config
+      - ENABLE_API_SERVER=true
+      - API_PORT=3000
+      # Masterdiskon API
+      - MASTERDISKON_API_BASE_URL=https://api.masterdiskon.com/v1
+      - MASTERDISKON_API_ACCOUNT=52
+    ports:
+      # API Server port
+      - "3000:3000"
+    volumes:
+      # Persist WhatsApp session agar tidak perlu scan QR lagi
+      - wa_session:/app/.wwebjs_auth
+      - wa_cache:/app/.wwebjs_cache
+    networks:
+      - wa_bot_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql_data:
+    driver: local
+  wa_session:
+    driver: local
+  wa_cache:
+    driver: local
+
+networks:
+  wa_bot_network:
+    driver: bridge
+# ============================================
+# CARA MENJALANKAN
+# ============================================
+#
+# 1. Pastikan file .env sudah ada dan berisi GEMINI_API_KEY
+#
+# 2. Build & Start semua services:
+#    docker compose up -d
+#
+# 3. Lihat logs (untuk scan QR code WhatsApp):
+#    docker compose logs -f whatsapp-bot
+#
+# 4. Stop semua services:
+#    docker compose down
+#
+# 5. Stop dan hapus data (reset):
+#    docker compose down -v
+#
+# ============================================
+# SERVICES & PORTS
+# ============================================
+#
+# - MySQL: localhost:3307 (host) -> 3306 (container)
+# - API Server: localhost:3000 (WhatsApp Bot + REST API)
+# - WhatsApp: Scan QR dari logs
+#
+# ============================================
+# NOTE
+# ============================================
+#
+# - MySQL port 3307 agar tidak bentrok dengan MySQL server lain
+# - WhatsApp session di-persist di Docker volume (tidak perlu scan ulang)
+# - API server jalan bersamaan dengan WhatsApp bot
+# 4. Lihat logs: docker-compose logs -f mysql
+# 5. Stop: docker-compose down
+# 6. Stop dan hapus data: docker-compose down -v
