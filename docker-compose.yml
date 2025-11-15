@@ -48,7 +48,7 @@ services:
       dockerfile: Dockerfile
     container_name: wa_bot_app
     restart: unless-stopped
-    shm_size: '2gb'
+    shm_size: "2gb"
     environment:
       # Database connection (connect ke service mysql)
       - DB_HOST=mysql
