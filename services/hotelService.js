@@ -288,7 +288,34 @@ async function searchHotels(params) {
         ? String(hotel.detail.longitude).replace(",", ".")
         : "";
 
+      // Build body_offer_details untuk get detail hotel ini
+      const bodyOfferDetails = {
+        product: "hotel",
+        from: geoid, // Use geoid from search
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        room: String(room),
+        childAge: [],
+        adult: String(adult),
+        keyword: hotel.name, // Hotel name sebagai keyword
+        child: String(child),
+        productId: String(hotel.id), // Hotel ID
+        infant: String(infant),
+        classFrom: "0",
+        classTo: "5",
+        showDetail: false,
+        productDetail: String(hotel.id), // Hotel ID
+        pax: {
+          room: String(room),
+          adult: String(adult),
+          child: String(child),
+          infant: String(infant),
+          childAge: [],
+        },
+      };
+
       return {
+        body_offer_details: bodyOfferDetails,
         id: hotel.id,
         name: hotel.name,
         price: hotel.price,

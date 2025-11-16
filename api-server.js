@@ -163,10 +163,18 @@ app.post("/api/chat/send", async (req, res) => {
     );
 
     let botResponse;
+    let apiData = null;
 
     if (hotelResponse) {
       // Hotel booking flow response
-      botResponse = hotelResponse;
+      if (typeof hotelResponse === "object" && hotelResponse.text) {
+        // Response with API data
+        botResponse = hotelResponse.text;
+        apiData = hotelResponse.apiResponse;
+      } else {
+        // Simple string response
+        botResponse = hotelResponse;
+      }
       console.log(`   🏨 Hotel booking flow activated`);
     } else {
       // 4. Get chat history (10 terakhir)
@@ -187,14 +195,21 @@ app.post("/api/chat/send", async (req, res) => {
     const botResponseHTML = convertWhatsAppToHTML(botResponse);
 
     // 8. Return response (both formats)
+    const responseData = {
+      user_message: userMessage,
+      bot_response: botResponse, // Original WhatsApp format
+      bot_response_html: botResponseHTML, // HTML format untuk web
+      timestamp: new Date().toISOString(),
+    };
+
+    // Include API response if available
+    if (apiData) {
+      responseData.api_response = apiData;
+    }
+
     res.json({
       success: true,
-      data: {
-        user_message: userMessage,
-        bot_response: botResponse, // Original WhatsApp format
-        bot_response_html: botResponseHTML, // HTML format untuk web
-        timestamp: new Date().toISOString(),
-      },
+      data: responseData,
     });
 
     console.log(`✅ API Response sent to ${userEmail}`);

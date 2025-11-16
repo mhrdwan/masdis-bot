@@ -152,6 +152,7 @@ function isGeneralQuestion(message) {
 
 /**
  * Handle hotel booking conversation flow
+ * Returns: string | null | { text: string, apiResponse: object }
  */
 async function handleHotelBooking(waNumber, message, userName) {
   const state = conversationState.getConversationState(waNumber);
@@ -546,7 +547,10 @@ async function performHotelSearch(waNumber, data) {
     response += `📧 cs@masterdiskon.com\n\n`;
     response += `_Sebutkan nama hotel yang Anda minati untuk mendapatkan penawaran terbaik!_`;
 
-    return response;
+    return {
+      text: response,
+      apiResponse: result,
+    };
   }
 
   // Case 2: Kalau TIDAK ada geoid (property langsung), pakai getHotelDetail
@@ -615,7 +619,10 @@ async function performHotelSearch(waNumber, data) {
     response += `📧 cs@masterdiskon.com\n\n`;
     response += `_Sebutkan tipe kamar yang Anda minati untuk mendapatkan penawaran terbaik!_`;
 
-    return response;
+    return {
+      text: response,
+      apiResponse: result,
+    };
   }
 }
 
