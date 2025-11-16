@@ -169,8 +169,13 @@ async function handleHotelBooking(waNumber, message, userName) {
     return null; // Let it fall through to normal LLM response
   }
 
-  // Step 1: Cari lokasi
+  // Step 1: Cari lokasi (ONLY if this is actually a hotel request)
   if (!state) {
+    // CHECK: Is this actually a hotel booking request?
+    if (!isHotelRequest(message)) {
+      return null; // Not a hotel request, let LLM handle it
+    }
+
     return await startHotelSearch(waNumber, message, userName);
   }
 
