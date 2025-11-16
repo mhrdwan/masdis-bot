@@ -246,7 +246,7 @@ async function startHotelSearch(waNumber, message, userName) {
   }
 
   if (!query) {
-    return "Maaf, saya tidak bisa menangkap lokasi yang Anda maksud. Bisa tolong sebutkan kota atau daerah yang Anda tuju?\n\nContoh: *Saya ingin menginap di Jakarta*";
+    return "Maaf, saya tidak bisa menangkap lokasi yang Anda maksud. Bisa tolong sebutkan kota atau daerah yang Anda tuju?\n\nContoh: Saya ingin menginap di Jakarta";
   }
 
   // Search location via API
@@ -254,7 +254,7 @@ async function startHotelSearch(waNumber, message, userName) {
 
   if (!locationResult) {
     conversationState.clearConversationState(waNumber);
-    return `Maaf, saya tidak menemukan lokasi "*${query}*". Bisa coba dengan nama kota lain?\n\nContoh: Jakarta, Bali, Bandung, Surabaya`;
+    return `Maaf, saya tidak menemukan lokasi "${query}". Bisa coba dengan nama kota lain?\n\nContoh: Jakarta, Bali, Bandung, Surabaya`;
   }
 
   // Extract budget jika ada di pesan awal
@@ -272,9 +272,9 @@ async function startHotelSearch(waNumber, message, userName) {
   );
 
   if (locationResult.type === "region") {
-    return `Baik, saya menemukan wilayah: *${locationResult.name}* 📍\n\nApakah lokasi ini sudah benar? (Ya/Tidak)`;
+    return `Baik, saya menemukan wilayah: ${locationResult.name} 📍\n\nApakah lokasi ini sudah benar? (Ya/Tidak)`;
   } else {
-    return `Saya menemukan hotel: *${locationResult.name}* ${
+    return `Saya menemukan hotel: ${locationResult.name} ${
       locationResult.starRating ? "⭐".repeat(locationResult.starRating) : ""
     }\n\nApakah Anda ingin cari hotel di sekitar area ini? (Ya/Tidak)`;
   }
@@ -288,7 +288,7 @@ async function handleLocationConfirm(waNumber, message, state) {
 
   if (lowerMsg === "tidak" || lowerMsg === "no" || lowerMsg === "bukan") {
     conversationState.clearConversationState(waNumber);
-    return "Oke, silakan sebutkan lokasi yang benar.\n\nContoh: *Saya ingin menginap di Bali*";
+    return "Oke, silakan sebutkan lokasi yang benar.\n\nContoh: Saya ingin menginap di Bali";
   }
 
   if (
@@ -297,7 +297,7 @@ async function handleLocationConfirm(waNumber, message, state) {
     lowerMsg !== "iya" &&
     lowerMsg !== "betul"
   ) {
-    return "Mohon jawab *Ya* atau *Tidak*";
+    return "Mohon jawab Ya atau Tidak";
   }
 
   // Lokasi confirmed, minta tanggal check-in
@@ -310,7 +310,7 @@ async function handleLocationConfirm(waNumber, message, state) {
     state.data
   );
 
-  return `Baik! Kapan Anda ingin *check-in*? 📅\n\nFormat: DD-MM-YYYY atau ketik "besok"\nContoh: 16-11-2025 atau besok`;
+  return `Baik! Kapan Anda ingin check-in? 📅\n\nFormat: DD-MM-YYYY atau ketik "besok"\nContoh: 16-11-2025 atau besok`;
 }
 
 /**
@@ -320,7 +320,7 @@ async function handleCheckInDate(waNumber, message, state) {
   const checkInDate = hotelService.parseDate(message);
 
   if (!checkInDate) {
-    return "Maaf, format tanggal tidak valid. Silakan coba lagi.\n\nContoh: *16-11-2025* atau *besok*";
+    return "Maaf, format tanggal tidak valid. Silakan coba lagi.\n\nContoh: 16-11-2025 atau besok";
   }
 
   conversationState.updateConversationData(waNumber, {
@@ -332,9 +332,9 @@ async function handleCheckInDate(waNumber, message, state) {
     state.data
   );
 
-  return `Check-in: *${hotelService.formatDate(
+  return `Check-in: ${hotelService.formatDate(
     checkInDate
-  )}* ✅\n\nKapan Anda ingin *check-out*? 📅\n\nFormat: DD-MM-YYYY\nContoh: 17-11-2025`;
+  )} ✅\n\nKapan Anda ingin check-out? 📅\n\nFormat: DD-MM-YYYY\nContoh: 17-11-2025`;
 }
 
 /**
@@ -344,7 +344,7 @@ async function handleCheckOutDate(waNumber, message, state) {
   const checkOutDate = hotelService.parseDate(message);
 
   if (!checkOutDate) {
-    return "Maaf, format tanggal tidak valid. Silakan coba lagi.\n\nContoh: *17-11-2025*";
+    return "Maaf, format tanggal tidak valid. Silakan coba lagi.\n\nContoh: 17-11-2025";
   }
 
   // Validasi check-out harus setelah check-in
@@ -366,9 +366,9 @@ async function handleCheckOutDate(waNumber, message, state) {
     state.data
   );
 
-  return `Check-out: *${hotelService.formatDate(
+  return `Check-out: ${hotelService.formatDate(
     checkOutDate
-  )}* ✅\n\nBerapa jumlah tamu? 👥\n\nFormat: Dewasa-Anak-Bayi\nContoh: *2-0-0* (2 dewasa, tanpa anak)\nAtau ketik angka saja untuk dewasa: *2*`;
+  )} ✅\n\nBerapa jumlah tamu? 👥\n\nFormat: Dewasa-Anak-Bayi\nContoh: 2-0-0 (2 dewasa, tanpa anak)\nAtau ketik angka saja untuk dewasa: 2`;
 }
 
 /**
@@ -380,7 +380,7 @@ async function handleGuestCount(waNumber, message, state) {
   const match = message.trim().match(guestPattern);
 
   if (!match) {
-    return "Format tidak valid. Silakan masukkan jumlah tamu.\n\nContoh: *2-1-0* (2 dewasa, 1 anak, 0 bayi)\nAtau: *2* (2 dewasa saja)";
+    return "Format tidak valid. Silakan masukkan jumlah tamu.\n\nContoh: 2-1-0 (2 dewasa, 1 anak, 0 bayi)\nAtau: 2 (2 dewasa saja)";
   }
 
   const adult = parseInt(match[1]) || 1;
@@ -398,9 +398,9 @@ async function handleGuestCount(waNumber, message, state) {
     state.data
   );
 
-  return `Tamu: *${adult} dewasa${child > 0 ? ", " + child + " anak" : ""}${
+  return `Tamu: ${adult} dewasa${child > 0 ? ", " + child + " anak" : ""}${
     infant > 0 ? ", " + infant + " bayi" : ""
-  }* ✅\n\nBerapa jumlah kamar yang dibutuhkan? 🛏️\n\nContoh: *1* atau *2*`;
+  } ✅\n\nBerapa jumlah kamar yang dibutuhkan? 🛏️\n\nContoh: 1 atau 2`;
 }
 
 /**
@@ -410,7 +410,7 @@ async function handleRoomCount(waNumber, message, state) {
   const room = parseInt(message.trim());
 
   if (isNaN(room) || room < 1) {
-    return "Jumlah kamar tidak valid. Minimal 1 kamar.\n\nContoh: *1*";
+    return "Jumlah kamar tidak valid. Minimal 1 kamar.\n\nContoh: 1";
   }
 
   conversationState.updateConversationData(waNumber, { room });
@@ -423,7 +423,7 @@ async function handleRoomCount(waNumber, message, state) {
       "awaiting_budget",
       state.data
     );
-    return `Kamar: *${room}* kamar ✅\n\nApakah Anda punya budget maksimal per malam? 💰\n\nContoh: *500rb*, *1juta*, *1.5jt*\nAtau ketik *skip* untuk melihat semua hotel`;
+    return `Kamar: ${room} kamar ✅\n\nApakah Anda punya budget maksimal per malam? 💰\n\nContoh: 500rb, 1juta, 1.5jt\nAtau ketik skip untuk melihat semua hotel`;
   }
 
   // Sudah ada budget, langsung search
@@ -446,7 +446,7 @@ async function handleBudget(waNumber, message, state) {
   const budget = extractBudget(message);
 
   if (!budget) {
-    return "Format budget tidak valid. Silakan coba lagi.\n\nContoh: *500rb*, *1juta*, *1.5jt*\nAtau ketik *skip* untuk skip";
+    return "Format budget tidak valid. Silakan coba lagi.\n\nContoh: 500rb, 1juta, 1.5jt\nAtau ketik skip untuk skip";
   }
 
   conversationState.updateConversationData(waNumber, { budget });
@@ -491,11 +491,11 @@ async function performHotelSearch(waNumber, data) {
     const result = await hotelService.searchHotels(searchParams);
 
     if (result.hotels.length === 0) {
-      return `Maaf, tidak ada hotel tersedia di *${locationResult.name}* untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau lokasi lain?`;
+      return `Maaf, tidak ada hotel tersedia di ${locationResult.name} untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau lokasi lain?`;
     }
 
     // Format response untuk list hotel
-    let response = `🏨 *HOTEL DI ${locationResult.name.toUpperCase()}*\n\n`;
+    let response = `🏨 HOTEL DI ${locationResult.name.toUpperCase()}\n\n`;
     response += `📅 ${hotelService.formatDate(
       checkInDate
     )} - ${hotelService.formatDate(checkOutDate)}\n`;
@@ -512,7 +512,7 @@ async function performHotelSearch(waNumber, data) {
     const hotelsToShow = result.hotels.slice(0, 7);
 
     hotelsToShow.forEach((hotel, index) => {
-      response += `*${index + 1}. ${hotel.name}*\n`;
+      response += `${index + 1}. ${hotel.name}\n`;
       response += `${"⭐".repeat(hotel.class || 0)}\n`;
       response += `💰 ${hotelService.formatPrice(
         hotel.isPromo ? hotel.promoPrice : hotel.price
@@ -543,7 +543,7 @@ async function performHotelSearch(waNumber, data) {
 
     response += `━━━━━━━━━━━━━━━━━━━━\n\n`;
     response += `Untuk booking, hubungi Customer Service kami:\n`;
-    response += `📞 *0822 5500 3535*\n`;
+    response += `📞 0822 5500 3535\n`;
     response += `📧 cs@masterdiskon.com\n\n`;
     response += `_Sebutkan nama hotel yang Anda minati untuk mendapatkan penawaran terbaik!_`;
 
@@ -569,11 +569,11 @@ async function performHotelSearch(waNumber, data) {
     const result = await hotelService.getHotelDetail(detailParams);
 
     if (!result.hotel || result.rooms.length === 0) {
-      return `Maaf, *${locationResult.name}* tidak tersedia untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau pilih hotel lain?`;
+      return `Maaf, ${locationResult.name} tidak tersedia untuk tanggal tersebut. 😔\n\nCoba ubah tanggal atau pilih hotel lain?`;
     }
 
     // Format response untuk hotel detail + rooms
-    let response = `🏨 *${result.hotel.name.toUpperCase()}*\n`;
+    let response = `🏨 ${result.hotel.name.toUpperCase()}\n`;
     response += `${"⭐".repeat(result.hotel.class || 0)}\n\n`;
     response += `📅 ${hotelService.formatDate(
       checkInDate
@@ -597,11 +597,11 @@ async function performHotelSearch(waNumber, data) {
     }
 
     response += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-    response += `*PILIHAN KAMAR:*\n\n`;
+    response += `PILIHAN KAMAR:\n\n`;
 
     // Tampilkan max 5 room options
     result.rooms.forEach((room, index) => {
-      response += `*${index + 1}. ${room.type}*\n`;
+      response += `${index + 1}. ${room.type}\n`;
       response += `💰 ${hotelService.formatPrice(room.price)}`;
       if (room.promoPrice && room.promoPrice !== room.price) {
         response += ` ~${hotelService.formatPrice(room.promoPrice)}~ 🔥`;
@@ -615,7 +615,7 @@ async function performHotelSearch(waNumber, data) {
 
     response += `━━━━━━━━━━━━━━━━━━━━\n\n`;
     response += `Untuk booking, hubungi Customer Service kami:\n`;
-    response += `📞 *0822 5500 3535*\n`;
+    response += `📞 0822 5500 3535\n`;
     response += `📧 cs@masterdiskon.com\n\n`;
     response += `_Sebutkan tipe kamar yang Anda minati untuk mendapatkan penawaran terbaik!_`;
 
